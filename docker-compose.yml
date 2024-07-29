@@ -50,6 +50,7 @@ services:
     volumes:
       - ./uploads:${UPLOAD_DIR}
       - ./result:${RESULT_FOLDER}
+      - ./certs:/etc/nginx/certs:ro
     ports:
       - "8081:${WEBSERVER_PORT}"
     depends_on:
