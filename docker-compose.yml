@@ -9,6 +9,8 @@ services:
       - ./nginx_configs/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx_configs/conf.d:/etc/nginx/conf.d:ro
       - ./certs:/etc/nginx/certs:ro
+    environment:
+      - API_TOKEN=${API_TOKEN}
     depends_on:
       - bot
     networks:
