@@ -24,7 +24,7 @@ $(CERT_KEY): | $(CERT_DIR)
 	openssl genrsa -out $(CERT_KEY) 2048
 
 
-$(CERT_CERT):
+$(CERT_CERT): | $(CERT_DIR)
 	openssl req -newkey rsa:2048 -sha256 -nodes -x509 -days 365 -keyout $(CERT_KEY) -out $(CERT_CERT) -subj $(CERT_SUBJ)
 
 clean_certs:
