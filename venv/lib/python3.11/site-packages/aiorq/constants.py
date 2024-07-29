@@ -1,0 +1,13 @@
+default_queue_name = 'aiorq:queue'
+default_worker_name = "pai"
+job_key_prefix = 'aiorq:job:'
+in_progress_key_prefix = 'aiorq:in-progress:'
+result_key_prefix = 'aiorq:result:'
+retry_key_prefix = 'aiorq:retry:'
+abort_jobs_ss = 'aiorq:abort'
+abort_job_max_age = 60
+health_check_key_suffix = 'aiorq:health-check:'
+keep_cronjob_progress = 60
+worker_key = "aiorq:worker"
+func_key = "aiorq:function"
+worker_key_close_expire = 60 * 60 * 24 * 7

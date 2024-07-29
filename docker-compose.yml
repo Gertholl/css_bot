@@ -1,0 +1,77 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx_configs/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx_configs/conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - bot
+    networks:
+      - app-network
+
+  worker:
+    build: .
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - REDIS_URL=${REDIS_URL}
+      - UPLOAD_DIR=${UPLOAD_DIR}
+      - RESULT_FOLDER=${RESULT_FOLDER}
+      - WEBHOOK_HOST=${WEBHOOK_HOST}
+      - WEBHOOK_PORT=${WEBHOOK_PORT}
+      - WEBSERVER_HOST=${WEBSERVER_HOST}
+      - WEBSERVER_PORT=${WEBSERVER_PORT}
+    volumes:
+      - ./uploads:${UPLOAD_DIR}
+      - ./result:${RESULT_FOLDER}
+    depends_on:
+      - redis
+      - bot
+    command: rq worker-pool --url ${REDIS_URL} -n 3
+    networks:
+      - app-network
+
+  bot:
+    build: .
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - REDIS_URL=${REDIS_URL}
+      - UPLOAD_DIR=${UPLOAD_DIR}
+      - RESULT_FOLDER=${RESULT_FOLDER}
+      - WEBHOOK_HOST=${WEBHOOK_HOST}
+      - WEBSERVER_HOST=${WEBSERVER_HOST}
+      - WEBSERVER_PORT=${WEBSERVER_PORT}
+    volumes:
+      - ./uploads:${UPLOAD_DIR}
+      - ./result:${RESULT_FOLDER}
+    ports:
+      - "8081:${WEBSERVER_PORT}"
+    depends_on:
+      - redis
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://${WEBHOOK_HOST}/health_check"
+        ]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

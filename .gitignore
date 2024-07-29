@@ -1,0 +1,7 @@
+./venv
+./result/*
+./uploads/*
+./result
+./uploads
+./certs
+.env
