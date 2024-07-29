@@ -4,9 +4,9 @@ ENV_FILE := .env
 
 
 CERT_DIR=certs
-CERT_KEY=$(CERT_DIR)/server.key
+CERT_KEY=$(CERT_DIR)/server_pkey.pem
 CERT_CSR=$(CERT_DIR)/server.csr
-CERT_CERT=$(CERT_DIR)/server.pem
+CERT_CERT=$(CERT_DIR)/server_cert.pem
 CERT_DAYS=365
 CERT_SUBJ="/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
 
