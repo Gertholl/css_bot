@@ -6,11 +6,11 @@ ENV_FILE := .env
 CERT_DIR=certs
 CERT_KEY=$(CERT_DIR)/server.key
 CERT_CSR=$(CERT_DIR)/server.csr
-CERT_CERT=$(CERT_DIR)/server.crt
+CERT_CERT=$(CERT_DIR)/server.pem
 CERT_DAYS=365
 CERT_SUBJ="/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
 
-.PHONY: all
+.PHONY: clean_certs create_certs up
 
 all: clean_certs create_certs up
 
@@ -23,11 +23,9 @@ $(CERT_DIR):
 $(CERT_KEY): | $(CERT_DIR)
 	openssl genrsa -out $(CERT_KEY) 2048
 
-$(CERT_CSR): $(CERT_KEY)
-	openssl req -new -key $(CERT_KEY) -out $(CERT_CSR) -subj $(CERT_SUBJ)
 
-$(CERT_CERT): $(CERT_CSR)
-	openssl x509 -req -days $(CERT_DAYS) -in $(CERT_CSR) -signkey $(CERT_KEY) -out $(CERT_CERT)
+$(CERT_CERT):
+	openssl req -newkey rsa:2048 -sha256 -nodes -x509 -days 365 -keyout $(CERT_KEY) -out $(CERT_CERT) -subj $(CERT_SUBJ)
 
 clean_certs:
 	rm -rf $(CERT_DIR)
