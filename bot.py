@@ -23,7 +23,7 @@ from config import Config
 
 logging.basicConfig(level=logging.DEBUG)
 
-load_dotenv(".env")
+#load_dotenv(".env")
 config = Config()
 
 router = Router()
@@ -148,6 +148,7 @@ async def on_startup(bot: Bot):
         url=f"{config.WEBHOOK_HOST}/webhook/{config.API_TOKEN}",
         drop_pending_updates=True,
         secret_token=config.SECRET_TOKEN,
+        certificate=FSInputFile('./certs/server_cert.pem'),
         allowed_updates=["message", "callback_query"],
     )
     data = await bot.get_webhook_info()
