@@ -1,2 +1,0 @@
-0 0 * * * certbot renew --quiet --nginx
-
