@@ -102,6 +102,7 @@ def main(
         RESULT_FOLDER=result_folder,
         WEBSERVER_HOST=host,
         WEBSERVER_PORT=port,
+        MODE=mode
     )
 
     redis_conn = Redis.from_url(config.REDIS_URL)

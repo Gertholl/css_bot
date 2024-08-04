@@ -50,12 +50,12 @@ services:
       - WEBHOOK_HOST=${WEBHOOK_HOST}
       - WEBSERVER_HOST=${WEBSERVER_HOST}
       - WEBSERVER_PORT=${WEBSERVER_PORT}
-      - MODE=${MODE}
+      - MODE=prod
     volumes:
       - ./uploads:${UPLOAD_DIR}
       - ./result:${RESULT_FOLDER}
       - ./certs:/etc/nginx/certs:ro
-    command: python3 bot.py --mode ${MODE} --host ${WEBSERVER_HOST} --port ${WEBSERVER_PORT} --token ${API_TOKEN} --secret ${SECRET_TOKEN} --redis_url ${REDIS_URL} --webhook_host ${WEBHOOK_HOST} --webhook_port ${WEBHOOK_PORT} --webhook_path ${WEBHOOK_PATH} --upload_dir ${UPLOAD_DIR} --result_folder ${RESULT_FOLDER}
+    command: python3 bot.py --mode prod --host ${WEBSERVER_HOST} --port ${WEBSERVER_PORT} --token ${API_TOKEN} --secret ${SECRET_TOKEN} --redis_url ${REDIS_URL} --webhook_host ${WEBHOOK_HOST} --webhook_port ${WEBHOOK_PORT} --webhook_path ${WEBHOOK_PATH} --upload_dir ${UPLOAD_DIR} --result_folder ${RESULT_FOLDER}
     ports:
       - "8082:${WEBSERVER_PORT}"
     depends_on:
@@ -70,9 +70,9 @@ services:
         ]
       interval: 1m30s
       timeout: 30s
-      retries: 5
+      retries: 3
       start_period: 30s
-    restart: on-failure:health
+    restart: on-failure
     networks:
       - app-network
 

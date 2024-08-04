@@ -53,7 +53,7 @@ def parse_characteristics(char_str):
         if len(key_value) == 2:
             key = key_value[0].strip()
             value = key_value[1].strip()
-            if not re.match(size_pattern, value):
+            if not re.findall(size_pattern, value):
                 value = value.replace("/", "")
             characteristics[key] = value
     return characteristics
