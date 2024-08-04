@@ -10,6 +10,7 @@ import logging
 
 
 url_pattern = re.compile(r"https?://[^\s/$.?#].[^\s]*")
+size_pattern = re.compile(r"\d+/\d+")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,7 +45,7 @@ def parse_characteristics(char_str):
         characteristics["Image_url"] = None
 
     # Разбиваем оставшуюся строку по '/'
-    items = char_str.split("/")
+    items = char_str.split("/ ")
 
     # Обрабатываем оставшиеся элементы
     for item in items:
@@ -52,6 +53,8 @@ def parse_characteristics(char_str):
         if len(key_value) == 2:
             key = key_value[0].strip()
             value = key_value[1].strip()
+            if not re.match(size_pattern, value):
+                value = value.replace("/", "")
             characteristics[key] = value
     return characteristics
 

@@ -1,3 +1,4 @@
+import logging
 import os, aiofiles
 import aiofiles.os
 from aiogram import types, F, Router, Bot
@@ -59,7 +60,7 @@ async def process_document(
     await bot.download_file(file_path=file_info.file_path, destination=upload_path)
 
     job = q.enqueue(
-        worker.process_file,
+        "worker.process_file",
         args=(
             upload_path,
             result_path,

@@ -38,10 +38,10 @@ stop:
 	docker-compose -f $(COMPOSE_FILE) stop
 
 down:
-	docker-compose -f $(DEV_COMPOSE_FILE) --env-file $(DEV_ENV_FILE) down
+	docker-compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) down
 
 clean:
-	docker-compose -f $(DEV_COMPOSE_FILE) --env-file $(DEV_ENV_FILE) down --rmi all --volumes
+	docker-compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) down --rmi all --volumes
 
 ngrok: env
 	ngrok http $(WEBHOOK_PORT)
