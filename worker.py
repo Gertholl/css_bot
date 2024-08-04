@@ -1,16 +1,19 @@
 import pandas as pd
-import re
-
 from redis import Redis
 from rq import Queue
-from bot import config
+import re
 import os
 from aiogram.types import FSInputFile
-from aiogram import Bot
+from aiogram import Bot, types
+
+import logging
+
 
 url_pattern = re.compile(r"https?://[^\s/$.?#].[^\s]*")
-bot = Bot(token=config.API_TOKEN)
-q = Queue(connection=Redis.from_url(config.REDIS_URL))
+size_pattern = re.compile(r"\d+/\d+")
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def parse_characteristics(char_str):
@@ -42,7 +45,7 @@ def parse_characteristics(char_str):
         characteristics["Image_url"] = None
 
     # Разбиваем оставшуюся строку по '/'
-    items = char_str.split("/")
+    items = char_str.split("/ ")
 
     # Обрабатываем оставшиеся элементы
     for item in items:
@@ -50,6 +53,8 @@ def parse_characteristics(char_str):
         if len(key_value) == 2:
             key = key_value[0].strip()
             value = key_value[1].strip()
+            if not re.match(size_pattern, value):
+                value = value.replace("/", "")
             characteristics[key] = value
     return characteristics
 
@@ -86,10 +91,14 @@ def parse_price(char_str):
     return characteristics
 
 
-def process_file(file_path, result_path, chat_id, message_id):
+def process_file(file_path, result_path, chat_id, message_id, bot_token, redis_url):
     # Загрузка CSV файла
     try:
         print(file_path, result_path)
+        logger.info(f"Processing file: {file_path}")
+        logger.debug(f"{bot_token}, {redis_url}")
+        bot = Bot(token=bot_token)
+        q = Queue(connection=Redis.from_url(redis_url))
         df = pd.read_csv(file_path, delimiter=";", header=None)
 
         # Получение 4-й колонки
@@ -147,18 +156,19 @@ def process_file(file_path, result_path, chat_id, message_id):
 
         q.enqueue(
             send_result,
-            args=(result_path, file_path, chat_id, message_id),
+            args=(result_path, file_path, chat_id, message_id, bot_token),
         )
 
         return result_path
     except Exception as e:
         q.enqueue(
             send_error,
-            args=(result_path, file_path, chat_id, message_id),
+            args=(result_path, file_path, chat_id, message_id, bot_token),
         )
 
 
-async def send_error(result_path, upload_path, chat_id, message_id):
+async def send_error(result_path, upload_path, chat_id, message_id, bot_token):
+    bot = Bot(token=bot_token)
     await bot.delete_messages(chat_id=chat_id, message_ids=[message_id])
     await bot.send_message(
         chat_id=chat_id,
@@ -167,12 +177,13 @@ async def send_error(result_path, upload_path, chat_id, message_id):
     os.remove(upload_path)
 
 
-async def send_result(result_path, upload_path, chat_id, message_id):
+async def send_result(result_path, upload_path, chat_id, message_id, bot_token):
+    bot = Bot(token=bot_token)
     await bot.delete_messages(chat_id=chat_id, message_ids=[message_id])
     await bot.send_document(
         chat_id=chat_id,
         document=FSInputFile(result_path),
         caption="Результат обработки",
     )
-    os.remove(result_path)
     os.remove(upload_path)
+    os.remove(result_path)

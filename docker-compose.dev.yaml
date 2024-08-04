@@ -1,40 +1,13 @@
 version: '3'
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx_configs/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx_configs/conf.d:/etc/nginx/conf.d:ro
-      - ./certs:/etc/nginx/certs:ro
-    environment:
-      - API_TOKEN=${API_TOKEN}
-    depends_on:
-      - bot
-    networks:
-      - app-network
-
   worker:
     build: .
-    environment:
-      - API_TOKEN=${API_TOKEN}
-      - REDIS_URL=${REDIS_URL}
-      - UPLOAD_DIR=${UPLOAD_DIR}
-      - RESULT_FOLDER=${RESULT_FOLDER}
-      - WEBHOOK_HOST=${WEBHOOK_HOST}
-      - WEBHOOK_PORT=${WEBHOOK_PORT}
-      - WEBSERVER_HOST=${WEBSERVER_HOST}
-      - WEBSERVER_PORT=${WEBSERVER_PORT}
-      - MODE=${MODE}
-    .env_file:
-      - .env
+    env_file:
+      - .env.dev
     volumes:
       - ./uploads:${UPLOAD_DIR}
       - ./result:${RESULT_FOLDER}
     depends_on:
-      - redis
       - bot
     command: rq worker-pool --url ${REDIS_URL} -n 3
     networks:
@@ -42,22 +15,13 @@ services:
 
   bot:
     build: .
-    environment:
-      - API_TOKEN=${API_TOKEN}
-      - REDIS_URL=${REDIS_URL}
-      - UPLOAD_DIR=${UPLOAD_DIR}
-      - RESULT_FOLDER=${RESULT_FOLDER}
-      - WEBHOOK_HOST=${WEBHOOK_HOST}
-      - WEBSERVER_HOST=${WEBSERVER_HOST}
-      - WEBSERVER_PORT=${WEBSERVER_PORT}
-      - MODE=${MODE}
     volumes:
       - ./uploads:${UPLOAD_DIR}
       - ./result:${RESULT_FOLDER}
       - ./certs:/etc/nginx/certs:ro
     command: python3 bot.py --mode ${MODE} --host ${WEBSERVER_HOST} --port ${WEBSERVER_PORT} --token ${API_TOKEN} --secret ${SECRET_TOKEN} --redis_url ${REDIS_URL} --webhook_host ${WEBHOOK_HOST} --webhook_port ${WEBHOOK_PORT} --webhook_path ${WEBHOOK_PATH} --upload_dir ${UPLOAD_DIR} --result_folder ${RESULT_FOLDER}
     ports:
-      - "8082:${WEBSERVER_PORT}"
+      - "8081:${WEBSERVER_PORT}"
     depends_on:
       - redis
     healthcheck:
