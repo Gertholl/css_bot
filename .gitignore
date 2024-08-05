@@ -8,3 +8,4 @@
 ./certs
 .env
 *.pem
+.env.dev
