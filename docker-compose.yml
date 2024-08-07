@@ -61,11 +61,7 @@ services:
     depends_on:
       - redis
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          "curl -f ${WEBHOOK_HOST}/health_check || exit 1"
-        ]
+      test: [ 'CMD-SHELL', "curl -f ${HEALTHCHECK} || exit 1" ]
       interval: 1m30s
       timeout: 30s
       retries: 3
