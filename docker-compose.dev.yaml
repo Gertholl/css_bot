@@ -36,7 +36,7 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-    restart: on-failure:health
+    restart: on-failure
     networks:
       - app-network
 
