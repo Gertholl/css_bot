@@ -12,9 +12,6 @@ import logging
 url_pattern = re.compile(r"https?://[^\s/$.?#].[^\s]*")
 size_pattern = re.compile(r"\d+/\d+")
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 
 def parse_characteristics(char_str):
     characteristics = {}

@@ -24,6 +24,11 @@ from src.handlers.command import command_router
 from src.handlers.callback import callback_router
 
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
 async def on_startup(bot: Bot, config: Settings):
     logging.info("Bot started")
     await make_dir(config.UPLOAD_DIR)
@@ -102,7 +107,7 @@ def main(
         RESULT_FOLDER=result_folder,
         WEBSERVER_HOST=host,
         WEBSERVER_PORT=port,
-        MODE=mode
+        MODE=mode,
     )
 
     redis_conn = Redis.from_url(config.REDIS_URL)
