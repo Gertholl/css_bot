@@ -92,8 +92,8 @@ def process_file(file_path, result_path, chat_id, message_id, bot_token, redis_u
     # Загрузка CSV файла
     try:
         print(file_path, result_path)
-        logger.info(f"Processing file: {file_path}")
-        logger.debug(f"{bot_token}, {redis_url}")
+        logging.info(f"Processing file: {file_path}")
+        logging.debug(f"{bot_token}, {redis_url}")
         bot = Bot(token=bot_token)
         q = Queue(connection=Redis.from_url(redis_url))
         df = pd.read_csv(file_path, delimiter=";", header=None)
