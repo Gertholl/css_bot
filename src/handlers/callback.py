@@ -74,6 +74,8 @@ async def process(
             result,
             str(query.message.chat.id),
             msg.message_id,
+            config.API_TOKEN,
+            config.REDIS_URL,
         ),
     )
     await query.message.delete()
