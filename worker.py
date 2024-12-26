@@ -15,76 +15,76 @@ size_pattern = re.compile(r"\d+/\d+")
 
 def parse_characteristics(char_str):
     characteristics = {}
+    if isinstance(char_str, str):
+        # Поиск ссылки в строке
+        found_urls = url_pattern.findall(char_str)
+        found_urls = [u.replace(",", "") for u in found_urls]
 
-    # Поиск ссылки в строке
-    found_urls = url_pattern.findall(char_str)
-    found_urls = [u.replace(",", "") for u in found_urls]
+        if found_urls:
+            # Удаление повторяющихся ссылок
+            filter_urls = []
+            for u in found_urls:
+                char_str = char_str.replace(u, "").strip()
 
-    if found_urls:
-        # Удаление повторяющихся ссылок
-        filter_urls = []
-        for u in found_urls:
-            char_str = char_str.replace(u, "").strip()
+                if ".jpg" in u:
+                    filter_urls.append(u)
+                elif ".png" in u:
+                    filter_urls.append(u)
+                elif ".jpeg" in u:
+                    filter_urls.append(u)
+                else:
+                    continue
 
-            if ".jpg" in u:
-                filter_urls.append(u)
-            elif ".png" in u:
-                filter_urls.append(u)
-            elif ".jpeg" in u:
-                filter_urls.append(u)
-            else:
-                continue
+            urls = ",".join(filter_urls)
+            # Удаление найденной ссылки из строки
+            characteristics["Image_url"] = urls
+        else:
+            characteristics["Image_url"] = None
 
-        urls = ",".join(filter_urls)
-        # Удаление найденной ссылки из строки
-        characteristics["Image_url"] = urls
-    else:
-        characteristics["Image_url"] = None
+        # Разбиваем оставшуюся строку по '/'
+        items = char_str.split("/ ")
 
-    # Разбиваем оставшуюся строку по '/'
-    items = char_str.split("/ ")
-
-    # Обрабатываем оставшиеся элементы
-    for item in items:
-        key_value = item.split(":", 1)
-        if len(key_value) == 2:
-            key = key_value[0].strip()
-            value = key_value[1].strip()
-            if not re.findall(size_pattern, value):
-                value = value.replace("/", "")
-            characteristics[key] = value
+        # Обрабатываем оставшиеся элементы
+        for item in items:
+            key_value = item.split(":", 1)
+            if len(key_value) == 2:
+                key = key_value[0].strip()
+                value = key_value[1].strip()
+                if not re.findall(size_pattern, value):
+                    value = value.replace("/", "")
+                characteristics[key] = value
     return characteristics
 
 
 def parse_exclusive(char_str):
     characteristics = {}
+    if isinstance(char_str, str):
+        items = char_str.split(" - ")
 
-    items = char_str.split(" - ")
-
-    characteristics["Эксклюзив"] = items[1]
+        characteristics["Эксклюзив"] = items[1]
 
     return characteristics
 
 
 def parse_category(char_str):
     characteristics = {}
+    if isinstance(char_str, str):
+        items = char_str.split(" - ")
 
-    items = char_str.split(" - ")
-
-    characteristics["Категория"] = items[0]
-    characteristics["Подкатегория"] = items[1]
+        characteristics["Категория"] = items[0]
+        characteristics["Подкатегория"] = items[1]
 
     return characteristics
 
 
 def parse_price(char_str):
     characteristics = {}
+    if isinstance(char_str, str):
+        items = char_str.split(" ")
 
-    items = char_str.split(" ")
-
-    characteristics["Цена"] = items[0]
-    if items[1] == "руб.":
-        characteristics["Валюта"] = "RUB"
+        characteristics["Цена"] = items[0]
+        if items[1] == "руб.":
+            characteristics["Валюта"] = "RUB"
     return characteristics
 
 
@@ -96,13 +96,13 @@ def process_file(file_path, result_path, chat_id, message_id, bot_token, redis_u
         logging.debug(f"{bot_token}, {redis_url}")
         bot = Bot(token=bot_token)
         q = Queue(connection=Redis.from_url(redis_url))
-        df = pd.read_csv(file_path, delimiter=";", header=None)
+        df = pd.read_csv(file_path, delimiter=";", header=0)
 
         # Получение 4-й колонки
-        col4_data = df.iloc[:, 4]
-        col16_data = df.iloc[:, 16]
-        col3_data = df.iloc[:, 3]
-        col14_data = df.iloc[:, 14]
+        col4_data = df['Характеристики']
+        col16_data = df['Эксклюзив']
+        col3_data = df['Название категории']
+        col14_data = df['Цена']
 
         # Регулярное выражение для поиска ссылки
 
@@ -122,7 +122,7 @@ def process_file(file_path, result_path, chat_id, message_id, bot_token, redis_u
         parsed_14_col_df = pd.json_normalize(parsed14_col)
 
         # Удаление 4-й колонки из исходного DataFrame
-        df.drop(columns=[3, 4, 14, 16], inplace=True)
+        df.drop(columns=["Характеристики", "Название категории", "Эксклюзив", "Цена"], inplace=True)
 
         df.rename(
             columns={
