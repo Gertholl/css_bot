@@ -52,4 +52,3 @@ rerun: down clean
 
 dev:
 	docker-compose -f $(DEV_COMPOSE_FILE) --env-file $(DEV_ENV_FILE) up
-

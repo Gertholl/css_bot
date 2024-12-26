@@ -51,6 +51,7 @@ async def on_startup(bot: Bot, config: Settings):
             allowed_updates=["message", "callback_query"],
         )
     data = await bot.get_webhook_info()
+    await bot.send_message(chat_id=config.ADMIN_ID, text="Bot started")
     logging.info(data.dict())
 
 
